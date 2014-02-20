@@ -81,14 +81,17 @@ void TFTLCD::pushColors(uint16_t *data, uint8_t len,
   uint16_t color;
   uint8_t  hi, lo;
 
- // Issue GRAM write command only on first call
   if(first == true) {
-    writeCommand(TFTLCD_RW_GRAM);  // Write Data to GRAM (R22h)
+    CS_ACTIVE
+    CD_DATA
+    RD_IDLE
+    WR_IDLE
+    setWriteDir();
   }
 
   while(len--) {
     color = *data++;
-    writeData(color);
+    writeData_unsafe(color);
   }
 }
 
