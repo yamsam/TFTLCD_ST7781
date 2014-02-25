@@ -46,6 +46,9 @@ uint16_t TFTLCD::height(void) {
 }
 
 void TFTLCD::goTo(int x, int y) {
+  if (rotation == 1 or rotation == 3){
+    swap(x, y);
+  }
   writeRegister(TFTLCD_GRAM_HOR_AD, x);     // GRAM Address Set (Horizontal Address) (R20h)
   writeRegister(TFTLCD_GRAM_VER_AD, y);     // GRAM Address Set (Vertical Address) (R21h)
   writeCommand(TFTLCD_RW_GRAM);            // Write Data to GRAM (R22h)
@@ -582,29 +585,45 @@ void TFTLCD::initDisplay(void) {
   }
 }
 
+void TFTLCD::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1){
+  if (rotation == 1 or rotation == 3){
+    swap(x0, y0);
+    swap(x1, y1);
+  }
+  writeRegister(TFTLCD_HOR_START_AD, x0);
+  writeRegister(TFTLCD_HOR_END_AD, x1);
+  writeRegister(TFTLCD_VER_START_AD, y0);
+  writeRegister(TFTLCD_VER_END_AD, y1);
+  writeCommand(TFTLCD_RW_GRAM);
+  return;
+}
+
 uint8_t TFTLCD::getRotation(void) {
   return rotation;
 }
 
 void TFTLCD::setRotation(uint8_t x) {
-  writeRegister(TFTLCD_ENTRY_MOD, 0x1028);
   
   x %= 4;  // cant be higher than 3
   rotation = x;
   switch (x) {
-  case 0:
+  case 0: // up
+    writeRegister(TFTLCD_ENTRY_MOD, 0x1030);
     _width = TFTWIDTH; 
     _height = TFTHEIGHT;
     break;
-  case 1:
+  case 1: // right 
+    writeRegister(TFTLCD_ENTRY_MOD, 0x1028);
     _width = TFTHEIGHT; 
     _height = TFTWIDTH;
     break;
-  case 2:
+  case 2: // down
+    writeRegister(TFTLCD_ENTRY_MOD, 0x1010);
     _width = TFTWIDTH; 
     _height = TFTHEIGHT;
     break;
-  case 3:
+  case 3: //  left
+    writeRegister(TFTLCD_ENTRY_MOD, 0x1018);
     _width = TFTHEIGHT; 
     _height = TFTWIDTH;
     break;

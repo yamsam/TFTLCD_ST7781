@@ -27,10 +27,14 @@ void setup(void) {
   
   tft.initDisplay();  
   tft.fillScreen(CYAN);
+  tft.setRotation(2);
 }
 
+int rotation = 0;
+
 void loop(void) {
-  SD.begin(SD_CS);
+   tft.setRotation(rotation++);
+   SD.begin(SD_CS);
    root = SD.open("/");
    root.seek(0);
    Serial.println("loop start");
@@ -51,6 +55,7 @@ void loadDirectory(File dir, int numTabs) {
      if (entry.isDirectory()) {
        Serial.println("**directory**");
      }else{
+       tft.goTo(0, 0);
        bmpDraw(entry.name(), 0, 0);
        delay(200);
        tft.fillScreen(CYAN);
@@ -124,11 +129,21 @@ void bmpDraw(char *filename, int x, int y) {
         // Crop area to be loaded
         w = bmpWidth;
         h = bmpHeight;
-        if((x+w-1) >= tft.width())  w = tft.width()  - x;
-        if((y+h-1) >= tft.height()) h = tft.height() - y;
-
+        
+        if((x+w-1) >= tft.width()){
+          w = tft.width()  - x; 
+        }else{
+          x = (tft.width() - w) / 2;
+        }
+        if((y+h-1) >= tft.height()){
+          h = tft.height() - y;
+        }else{
+          y = (tft.height() - h) / 2; 
+        }
+        
         // Set TFT address window to clipped image bounds
-       // tft.setAddrWindow(x, y, x+w-1, y+h-1);
+  	tft.setAddrWindow(x, y, x+w-1, y+h-1);
+	tft.goTo(x, y);
 
         for (row=0; row<h; row++) { // For each scanline...
           // Seek to start of scan line.  It might seem labor-
@@ -176,6 +191,8 @@ void bmpDraw(char *filename, int x, int y) {
       } // end goodBmp
     }
   }
+  tft.setAddrWindow(0, 0, tft.width(), tft.height());
+  tft.goTo(0, 0);
 
   bmpFile.close();
   if(!goodBmp) Serial.println(F("BMP format not recognized."));

@@ -110,13 +110,12 @@ class TFTLCD : public Print {
   void initDisplay(void);
   void goHome(void);
   void goTo(int x, int y);
-
+  void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
   void reset(void);
   void setRotation(uint8_t x);
   uint8_t getRotation();
 
   /* low level */
-
   void writeData(uint16_t d);
   void writeCommand(uint16_t c);
   uint16_t readData(void);
